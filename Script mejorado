@@ -1,0 +1,147 @@
+print("✅ BlockSpin Hub - Mejorado por Tóxico")
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local UserInputService = game:GetService("UserInputService")
+
+local ESP = true
+local InfJump = true
+local SpeedHack = true
+local Aimbot = true
+local InfStamina = true
+local Speed = 50
+
+-- ==================== ESP + NOMBRES ====================
+local function AddESP(plr)
+    if plr == LocalPlayer then return end
+    local function apply(char)
+        local hl = Instance.new("Highlight")
+        hl.FillColor = Color3.fromRGB(255, 255, 0)
+        hl.OutlineColor = Color3.fromRGB(255, 240, 0)
+        hl.FillTransparency = 0.3
+        hl.OutlineTransparency = 0
+        hl.Parent = char
+
+        local head = char:FindFirstChild("Head")
+        if head then
+            local bb = Instance.new("BillboardGui")
+            bb.Adornee = head
+            bb.Size = UDim2.new(0, 220, 0, 60)
+            bb.StudsOffset = Vector3.new(0, 5, 0)
+            bb.AlwaysOnTop = true
+            bb.Parent = char
+
+            local txt = Instance.new("TextLabel")
+            txt.Size = UDim2.new(1,0,1,0)
+            txt.BackgroundTransparency = 1
+            txt.Text = plr.Name
+            txt.TextColor3 = Color3.fromRGB(255, 255, 0)
+            txt.TextStrokeTransparency = 0
+            txt.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+            txt.TextScaled = true
+            txt.Font = Enum.Font.GothamBold
+            txt.Parent = bb
+        end
+    end
+    if plr.Character then apply(plr.Character) end
+    plr.CharacterAdded:Connect(apply)
+end
+
+for _, p in Players:GetPlayers() do AddESP(p) end
+Players.PlayerAdded:Connect(AddESP)
+
+-- ==================== GUI TIPO BARRA SUPERIOR ====================
+local sg = Instance.new("ScreenGui")
+sg.ResetOnSpawn = false
+sg.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local TopBar = Instance.new("Frame")
+TopBar.Size = UDim2.new(1, 0, 0, 65)
+TopBar.Position = UDim2.new(0, 0, 0, 0)
+TopBar.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+TopBar.BorderSizePixel = 0
+TopBar.Parent = sg
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(0, 220, 1, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "🔥 TÓXICO HUB"
+Title.TextColor3 = Color3.fromRGB(255, 215, 0)
+Title.TextScaled = true
+Title.Font = Enum.Font.GothamBold
+Title.Parent = TopBar
+
+-- Función para crear botones con colores
+local function CreateButton(text, color, posX, toggleVar)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 105, 0, 45)
+    btn.Position = UDim2.new(0, posX, 0, 10)
+    btn.BackgroundColor3 = color
+    btn.Text = text
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.TextScaled = true
+    btn.Font = Enum.Font.GothamSemibold
+    btn.Parent = TopBar
+
+    btn.MouseButton1Click:Connect(function()
+        toggleVar = not toggleVar
+        btn.BackgroundColor3 = toggleVar and color or Color3.fromRGB(80, 80, 80)
+        btn.Text = text .. (toggleVar and " ✓" or " ✕")
+    end)
+    return btn
+end
+
+-- Botones con colores como en la imagen
+CreateButton("ESP", Color3.fromRGB(255, 255, 0), 230, ESP)           -- Amarillo
+CreateButton("Jump", Color3.fromRGB(0, 170, 255), 345, InfJump)      -- Azul
+CreateButton("Speed", Color3.fromRGB(0, 255, 100), 460, SpeedHack)   -- Verde
+CreateButton("Aimbot", Color3.fromRGB(255, 60, 60), 575, Aimbot)     -- Rojo
+CreateButton("Stamina", Color3.fromRGB(255, 165, 0), 690, InfStamina)-- Naranja
+
+-- ==================== FUNCIONES ====================
+
+-- Infinite Stamina
+RunService.Heartbeat:Connect(function()
+    if InfStamina and LocalPlayer.Character then
+        local hum = LocalPlayer.Character:FindFirstChild("Humanoid")
+        if hum then
+            hum.JumpPower = 55
+            hum.WalkSpeed = SpeedHack and Speed or 16
+        end
+    end
+end)
+
+-- Infinite Jump
+RunService.Stepped:Connect(function()
+    if InfJump and LocalPlayer.Character then
+        local hum = LocalPlayer.Character:FindFirstChild("Humanoid")
+        if hum and hum:GetState() == Enum.HumanoidStateType.Jumping then
+            hum:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
+-- Speed
+RunService.Heartbeat:Connect(function()
+    if SpeedHack and LocalPlayer.Character then
+        local hum = LocalPlayer.Character:FindFirstChild("Humanoid")
+        if hum then hum.WalkSpeed = Speed end
+    end
+end)
+
+-- Aimbot
+RunService.RenderStepped:Connect(function()
+    if not Aimbot then return end
+    local closest, dist = nil, 99999
+    for _, p in Players:GetPlayers() do
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") and LocalPlayer.Character then
+            local d = (LocalPlayer.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude
+            if d < dist and d < 300 then
+                dist = d
+                closest = p
+            end
+        end
+    end
+    if
