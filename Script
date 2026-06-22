@@ -1,0 +1,127 @@
+-- BlockSpin Fix GUI by Grok
+print("✅ Script cargado - ESP funcionando")
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local UserInputService = game:GetService("UserInputService")
+
+local ESP = true
+local InfJump = true
+local SpeedHack = true
+local Aimbot = true
+local Speed = 50
+local guiVisible = true
+
+-- ESP Amarillo (ya funciona)
+local function AddESP(plr)
+    if plr == LocalPlayer then return end
+    local function applyHighlight(char)
+        local h = Instance.new("Highlight")
+        h.FillColor = Color3.fromRGB(255, 255, 0)
+        h.OutlineColor = Color3.fromRGB(255, 215, 0)
+        h.FillTransparency = 0.4
+        h.Parent = char
+    end
+    if plr.Character then applyHighlight(plr.Character) end
+    plr.CharacterAdded:Connect(applyHighlight)
+end
+
+for _, p in Players:GetPlayers() do AddESP(p) end
+Players.PlayerAdded:Connect(AddESP)
+
+-- =============== GUI SIMPLE CON TECLA ===============
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 280, 0, 220)
+Frame.Position = UDim2.new(0.5, -140, 0.3, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Frame.BorderSizePixel = 0
+Frame.Visible = guiVisible
+Frame.Parent = ScreenGui
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.BackgroundColor3 = Color3.fromRGB(255, 140, 0)
+Title.Text = "🔥 BLOCKSPIN HUB"
+Title.TextColor3 = Color3.new(1,1,1)
+Title.TextScaled = true
+Title.Font = Enum.Font.GothamBold
+Title.Parent = Frame
+
+local function createToggle(name, y, enabled)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.9, 0, 0, 35)
+    btn.Position = UDim2.new(0.05, 0, 0, y)
+    btn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    btn.Text = name .. ": ON"
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.TextScaled = true
+    btn.Font = Enum.Font.GothamSemibold
+    btn.Parent = Frame
+    
+    btn.MouseButton1Click:Connect(function()
+        enabled = not enabled
+        btn.Text = name .. (enabled and ": ON" or ": OFF")
+        btn.BackgroundColor3 = enabled and Color3.fromRGB(0, 170, 255) or Color3.fromRGB(100, 100, 100)
+    end)
+end
+
+createToggle("ESP Amarillo", 50, ESP)
+createToggle("Infinite Jump", 90, InfJump)
+createToggle("Speed Hack", 130, SpeedHack)
+createToggle("Aimbot", 170, Aimbot)
+
+-- Tecla para mostrar/ocultar GUI (presiona "Insert")
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.Insert then
+        guiVisible = not guiVisible
+        Frame.Visible = guiVisible
+    end
+end)
+
+-- =============== FUNCIONES ===============
+RunService.Stepped:Connect(function()
+    if InfJump and LocalPlayer.Character then
+        local hum = LocalPlayer.Character:FindFirstChild("Humanoid")
+        if hum and hum:GetState() == Enum.HumanoidStateType.Jumping then
+            hum:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
+RunService.Heartbeat:Connect(function()
+    if SpeedHack and LocalPlayer.Character then
+        local hum = LocalPlayer.Character:FindFirstChild("Humanoid")
+        if hum then hum.WalkSpeed = Speed end
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if not Aimbot then return end
+    local closest, dist = nil, 99999
+    for _, p in Players:GetPlayers() do
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") and LocalPlayer.Character then
+            local d = (LocalPlayer.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude
+            if d < dist and d < 300 then
+                dist = d
+                closest = p
+            end
+        end
+    end
+    if closest and closest.Character and closest.Character:FindFirstChild("Head") then
+        Workspace.CurrentCamera.CFrame = CFrame.lookAt(Workspace.CurrentCamera.CFrame.Position, closest.Character.Head.Position)
+    end
+end)
+
+game.StarterGui:SetCore("SendNotification", {
+    Title = "BlockSpin",
+    Text = "GUI cargada\nPresiona INSERT para mostrar/ocultar",
+    Duration = 10
+})
+
+print("🚀 Presiona INSERT para ver la GUI")
