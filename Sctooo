@@ -1,0 +1,127 @@
+print("✅ BlockSpin cargado - GUI automática")
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local UserInputService = game:GetService("UserInputService")
+
+local ESP = true
+local InfJump = true
+local SpeedHack = true
+local Aimbot = true
+local Speed = 50
+local guiVisible = true
+
+-- ESP Amarillo
+local function AddESP(plr)
+    if plr == LocalPlayer then return end
+    local function apply(char)
+        local h = Instance.new("Highlight")
+        h.FillColor = Color3.fromRGB(255, 255, 0)
+        h.OutlineColor = Color3.fromRGB(255, 215, 0)
+        h.FillTransparency = 0.4
+        h.Parent = char
+    end
+    if plr.Character then apply(plr.Character) end
+    plr.CharacterAdded:Connect(apply)
+end
+
+for _, p in Players:GetPlayers() do AddESP(p) end
+Players.PlayerAdded:Connect(AddESP)
+
+-- GUI (aparece automáticamente)
+local sg = Instance.new("ScreenGui")
+sg.ResetOnSpawn = false
+sg.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 280, 0, 220)
+frame.Position = UDim2.new(0.5, -140, 0.35, 0)
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+frame.Visible = true
+frame.Parent = sg
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1,0,0,45)
+title.BackgroundColor3 = Color3.fromRGB(255,140,0)
+title.Text = "🔥 BLOCKSPIN HUB"
+title.TextColor3 = Color3.new(1,1,1)
+title.TextScaled = true
+title.Font = Enum.Font.GothamBold
+title.Parent = frame
+
+local y = 55
+local function ToggleBtn(name, varRef)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.9,0,0,35)
+    btn.Position = UDim2.new(0.05,0,0,y)
+    btn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    btn.Text = name .. ": ON"
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.TextScaled = true
+    btn.Font = Enum.Font.GothamSemibold
+    btn.Parent = frame
+    y = y + 45
+
+    btn.MouseButton1Click:Connect(function()
+        varRef = not varRef
+        btn.Text = name .. (varRef and ": ON" or ": OFF")
+        btn.BackgroundColor3 = varRef and Color3.fromRGB(0,170,255) or Color3.fromRGB(100,100,100)
+    end)
+end
+
+ToggleBtn("ESP Amarillo", ESP)
+ToggleBtn("Infinite Jump", InfJump)
+ToggleBtn("Speed Hack", SpeedHack)
+ToggleBtn("Aimbot", Aimbot)
+
+-- Toggle con CAPS LOCK
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.CapsLock then
+        guiVisible = not guiVisible
+        frame.Visible = guiVisible
+    end
+end)
+
+-- Funciones
+RunService.Stepped:Connect(function()
+    if InfJump and LocalPlayer.Character then
+        local hum = LocalPlayer.Character:FindFirstChild("Humanoid")
+        if hum and hum:GetState() == Enum.HumanoidStateType.Jumping then
+            hum:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
+RunService.Heartbeat:Connect(function()
+    if SpeedHack and LocalPlayer.Character then
+        local hum = LocalPlayer.Character:FindFirstChild("Humanoid")
+        if hum then hum.WalkSpeed = Speed end
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if not Aimbot then return end
+    local closest, dist = nil, 99999
+    for _, p in Players:GetPlayers() do
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") and LocalPlayer.Character then
+            local d = (LocalPlayer.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude
+            if d < dist and d < 300 then
+                dist = d
+                closest = p
+            end
+        end
+    end
+    if closest and closest.Character and closest.Character:FindFirstChild("Head") then
+        Workspace.CurrentCamera.CFrame = CFrame.lookAt(Workspace.CurrentCamera.CFrame.Position, closest.Character.Head.Position)
+    end
+end)
+
+game.StarterGui:SetCore("SendNotification", {
+    Title = "BlockSpin Hub",
+    Text = "GUI cargada automáticamente\nPresiona CAPS LOCK para ocultar/mostrar",
+    Duration = 10
+})
+
+print("🚀 GUI visible - Usa CAPS LOCK para toggle")
